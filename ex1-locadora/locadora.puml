@@ -1,0 +1,121 @@
+@startuml NOW Filmes
+
+Cliente - Locação
+Locação - Filme
+
+Cliente .. locarFilme
+Cliente .. fazerDevolução
+verificarDividas .. Cliente
+
+Filme - MembroElenco
+Filme .. Origem
+
+removerCopia .. Filme
+adicionarCopia .. Filme
+
+Locação .. Construtor
+Locação .. devolver
+
+MembroElenco .. Cargo
+
+class Cliente {
+  String id
+  String nome
+  String cpf
+
+  void locarFilme()
+  void fazerDevolucao()
+  void verificarDividas()
+}
+
+annotation locarFilme {
+  Filme filme
+  Date prazoEntrega
+  float multaPorDiaDeAtraso
+  --
+  this.verificarDividas()
+  new Locação(...passar parâmetros)
+}
+
+annotation verificarDividas {
+  buscar dados de locações não pagas do cliente pelo ID
+  --
+  multaTotal = 0
+  para cada locacao com dataEntrega nula
+  multaTotal += (diaAtual - prazoEntrega) * multaPorDiaDeAtraso
+  return multaTotal
+}
+
+annotation fazerDevolução {
+  Filme filme
+  --
+  locacao = buscar locação por filme e cliente
+  locacao.pagar()
+  se pagamento bem-sucedido
+  locacao.devolver()
+}
+
+class Locação {
+  Cliente cliente
+  Filme filme
+  Date dataRetirada
+  Date dataEntrega
+  Date prazoEntrega
+  float multaPorDiaDeAtraso
+  boolean pago
+
+  void devolver()
+  void pagar()
+}
+
+annotation Construtor {
+  Definição de propriedades
+  filme.removerCopia()
+}
+
+annotation devolver {
+  this.setDataEntrega(diaAtual)
+  filme.adicionarCopia()
+}
+
+class Filme {
+  String id
+  String nome
+  MembroElenco[] elenco
+  String diretor
+  Origem paisOrigem
+  int anoLancamento
+  int copiasDisponiveis
+
+  boolean removerCopia()
+  boolean adicionarCopia()
+}
+
+annotation removerCopia {
+  verificar se há cópias disponíveis
+  this.copiasDisponiveis - 1
+}
+
+annotation adicionarCopia {
+  this.copiasDisponiveis + 1
+}
+
+enum Origem {
+  Estados Unidos
+  Reino Unido
+  Brasil
+  Espanha
+}
+
+class MembroElenco {
+  String nome
+  String personagem
+  Cargo cargo
+}
+
+enum Cargo {
+  Protagonista
+  Coadjuvante
+  Antagonista
+}
+@enduml
